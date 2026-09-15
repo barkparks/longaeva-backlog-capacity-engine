@@ -196,12 +196,59 @@
     #fan .band, #fan .medline, #fan .meddot{ opacity:1; transition:none; stroke-dashoffset:0; }
     #waterfall rect.bar{ transform:none; transition:none; }
   }
+
+
+  /* ---------- Stage 1 signal lab ---------- */
+  .hero-cta{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 46px;padding:18px 20px;border:1px solid #b9ded4;border-radius:12px;background:linear-gradient(135deg,#f2fbf8 0%,#fbfdfc 100%);text-decoration:none;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+  .hero-cta:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(16,163,127,.12);border-color:var(--teal)}
+  .hero-cta b{display:block;font-size:17px;color:var(--ink)}
+  .hero-cta span{display:block;font-size:13px;color:var(--ink-soft);margin-top:2px}
+  .hero-cta .arrow{font-size:23px;color:var(--teal-deep)}
+  .lab-shell{width:min(1120px,calc(100vw - 40px));margin:52px 50% 64px;transform:translateX(-50%);padding:34px;border:1px solid var(--hair);border-radius:18px;background:#f7f8f6;box-shadow:0 24px 60px rgba(26,26,26,.07)}
+  .lab-head{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:start;margin-bottom:24px}
+  .lab-kicker{font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:var(--teal-deep);margin-bottom:8px}
+  .lab-head h2{font-size:28px;line-height:1.18;letter-spacing:-.02em;text-transform:none;margin:0 0 8px}
+  .lab-head p{font-size:15px;line-height:1.55;color:var(--ink-soft);max-width:700px;margin:0}
+  .stage-badge{font-size:11px;line-height:1.35;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#725b00;background:#fff3bf;border:1px solid #eadb90;border-radius:999px;padding:8px 12px;white-space:nowrap}
+  .engine-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .engine{background:#fff;border:1px solid var(--hair);border-radius:13px;padding:18px;min-width:0}
+  .engine-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+  .engine-no{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-deep);font-weight:700}
+  .engine h3{font-size:18px;margin:3px 0 4px}
+  .engine-purpose{font-size:13px;line-height:1.45;color:var(--ink-soft);margin:0}
+  .recency{font-size:10.5px;color:#5d675f;background:#eef4f1;border-radius:999px;padding:5px 8px;white-space:nowrap}
+  .states{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:16px 0}
+  .state-btn{appearance:none;border:1px solid var(--hair-strong);border-radius:7px;background:#fff;padding:7px 5px;font-family:inherit;font-size:11px;color:var(--ink-soft);cursor:pointer}
+  .state-btn:hover{border-color:var(--teal)}
+  .state-btn.active{background:var(--ink);border-color:var(--ink);color:#fff}
+  .evidence{font-size:12px;line-height:1.5;background:var(--panel);border-radius:8px;padding:10px 11px;color:var(--ink-soft);margin-bottom:13px}
+  .evidence b{color:var(--ink)}
+  .flow{display:grid;grid-template-columns:1fr;gap:0}
+  .flow-step{padding:8px 10px;border-left:2px solid #cdd6d2;font-size:12px;line-height:1.4;color:var(--ink-soft);position:relative}
+  .flow-step:before{content:'';position:absolute;width:6px;height:6px;border-radius:50%;background:#cdd6d2;left:-4px;top:14px}
+  .flow-step:last-child{border-left-color:var(--teal)} .flow-step:last-child:before{background:var(--teal)}
+  .flow-step small{display:block;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--ink-faint);margin-bottom:2px}
+  .flow-step strong{font-weight:600;color:var(--ink)}
+  .output{margin-top:15px;border-radius:9px;padding:11px 12px;background:#eff8f5;font-size:12px;line-height:1.45;color:#326050}
+  .output b{color:#124d3b}
+  .dashboard{margin-top:16px;padding:20px;border-radius:13px;background:#151817;color:#fff}
+  .dashboard-head{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:16px}
+  .dashboard h3{font-size:18px;margin:0 0 3px}.dashboard p{font-size:11px;color:#aeb9b4;margin:0}
+  .confidence{text-align:right}.confidence b{display:block;font-size:20px;color:#73d7bb}.confidence span{font-size:10px;color:#aeb9b4;text-transform:uppercase;letter-spacing:.1em}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .metric{padding:13px;border:1px solid #343a37;border-radius:9px;background:#1d211f}
+  .metric span{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#9aa7a1;margin-bottom:5px}
+  .metric b{font-size:16px;color:#fff;font-weight:600}
+  .metric em{display:block;font-size:10.5px;color:#73d7bb;font-style:normal;margin-top:3px}
+  .disclaimer{font-size:11.5px;line-height:1.5;color:#6d746f;margin:15px 2px 0}
+  @media(max-width:800px){.lab-shell{padding:22px;width:calc(100vw - 24px)}.engine-grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.lab-head{grid-template-columns:1fr}.stage-badge{justify-self:start}.hero-cta{align-items:flex-start}}
+
 </style>
 </head>
 <body>
 <div id="progress"></div>
 <nav id="nav"><div class="rail">
-  <a href="#s01">Thesis</a><a href="#s02">Why JCI</a><a href="#s03">Architecture</a><a href="#s04">Stochastic</a><a href="#s05">Real-Time</a><a href="#s06">LLM Layer</a><a href="#s07">Evidence</a><a href="#s08">Edge</a><a href="#s09">Attribution</a><a href="#s10">Scale</a><a href="#s11">Plan</a><a href="#s12">Ask</a>
+  <a href="#lab">Signal Lab</a><a href="#s01">Thesis</a><a href="#s02">Why JCI</a><a href="#s03">Architecture</a><a href="#s04">Stochastic</a><a href="#s05">Real-Time</a><a href="#s06">LLM Layer</a><a href="#s07">Evidence</a><a href="#s08">Edge</a><a href="#s09">Attribution</a><a href="#s10">Scale</a><a href="#s11">Plan</a><a href="#s12">Ask</a>
 </div></nav>
 <div class="wrap">
 
@@ -226,6 +273,20 @@
   <div class="abstract rv">
     <p>Reported backlog is one number that hides the machine under it. This proposal models JCI as a causal driver graph: orders become backlog, backlog converts to revenue at a rate set by field-labor capacity, and a shift toward data-center cooling moves margin. Run forward under stochastic scenarios, it estimates the distribution of revenue, margin, and EPS paths, and traces every move back to a dated signal.</p>
   </div>
+
+  <a class="hero-cta rv" href="#lab"><div><b>Explore the Stage 1 signal lab</b><span>Test how four evidence engines translate source signals into an investment view.</span></div><div class="arrow">↓</div></a>
+
+  <section id="lab" class="lab-shell rv" aria-labelledby="lab-title">
+    <div class="lab-head"><div><div class="lab-kicker">Interactive signal-to-thesis workflow</div><h2 id="lab-title">A first read before the reported numbers</h2><p>Choose a broad signal state for each evidence engine. The prototype maps dated evidence to an operating driver, a predicted metric, and the thesis it tests.</p></div><div class="stage-badge">Stage 1 · Illustrative</div></div>
+    <div class="engine-grid">
+      <article class="engine" data-engine="demand"><div class="engine-top"><div><div class="engine-no">Engine 01</div><h3>Demand Radar</h3><p class="engine-purpose">Is data-center demand durable?</p></div><div class="recency">Sample · Aug 2026</div></div><div class="states"><button class="state-btn" data-level="0">Weak</button><button class="state-btn active" data-level="1">Mixed</button><button class="state-btn" data-level="2">Strong</button></div><div class="evidence"><b>Illustrative evidence set:</b> hyperscaler capex guidance, project and RFP announcements, permits, and power-interconnection activity.</div><div class="flow"><div class="flow-step"><small>Source signal</small><strong class="sig">Mixed project and capex signals</strong></div><div class="flow-step"><small>Operating driver</small>Future data-center order intake</div><div class="flow-step"><small>Predicted metric</small><strong class="pred">Organic orders: +4% to +8%</strong></div><div class="flow-step"><small>Thesis status</small><strong class="thesis">Watch · demand intact, visibility mixed</strong></div></div><div class="output"><b>Confidence: <span class="conf">Medium</span></b> · Recency: illustrative Aug 2026 snapshot</div></article>
+      <article class="engine" data-engine="backlog"><div class="engine-top"><div><div class="engine-no">Engine 02</div><h3>Backlog Quality Monitor</h3><p class="engine-purpose">Is backlog executable revenue?</p></div><div class="recency">Sample · Aug 2026</div></div><div class="states"><button class="state-btn" data-level="0">Fragile</button><button class="state-btn active" data-level="1">Stable</button><button class="state-btn" data-level="2">Resilient</button></div><div class="evidence"><b>Illustrative evidence set:</b> cancellation and deferral language, lead-time commentary, project timing, and customer capex revisions.</div><div class="flow"><div class="flow-step"><small>Source signal</small><strong class="sig">Limited deferrals; timing noise remains</strong></div><div class="flow-step"><small>Operating driver</small>Cancellation probability and backlog mix</div><div class="flow-step"><small>Predicted metric</small><strong class="pred">Backlog retained: 91% to 95%</strong></div><div class="flow-step"><small>Thesis status</small><strong class="thesis">Pass · quality supports conversion</strong></div></div><div class="output"><b>Confidence: <span class="conf">Medium</span></b> · Recency: illustrative Aug 2026 snapshot</div></article>
+      <article class="engine" data-engine="capacity"><div class="engine-top"><div><div class="engine-no">Engine 03</div><h3>Field Capacity Pulse</h3><p class="engine-purpose">Can demand become earnings?</p></div><div class="recency">Sample · Jul 2026</div></div><div class="states"><button class="state-btn" data-level="0">Tight</button><button class="state-btn active" data-level="1">Balanced</button><button class="state-btn" data-level="2">Expanding</button></div><div class="evidence"><b>Illustrative evidence set:</b> HVAC and controls job postings, hiring velocity, apprenticeship data, and skilled-labor commentary.</div><div class="flow"><div class="flow-step"><small>Source signal</small><strong class="sig">Hiring offsets normal attrition</strong></div><div class="flow-step"><small>Operating driver</small>Available install and service capacity</div><div class="flow-step"><small>Predicted metric</small><strong class="pred">Quarterly conversion: 24% to 28%</strong></div><div class="flow-step"><small>Thesis status</small><strong class="thesis">Watch · capacity is adequate, not loose</strong></div></div><div class="output"><b>Confidence: <span class="conf">Medium</span></b> · Recency: illustrative Jul 2026 snapshot</div></article>
+      <article class="engine" data-engine="mix"><div class="engine-top"><div><div class="engine-no">Engine 04</div><h3>Mix &amp; Economics Tracker</h3><p class="engine-purpose">Is growth EPS-accretive?</p></div><div class="recency">Sample · Aug 2026</div></div><div class="states"><button class="state-btn" data-level="0">Pressured</button><button class="state-btn active" data-level="1">Neutral</button><button class="state-btn" data-level="2">Accretive</button></div><div class="evidence"><b>Illustrative evidence set:</b> cooling launches and partnerships, liquid-cooling adoption, rack density, input-cost data, and supplier commentary.</div><div class="flow"><div class="flow-step"><small>Source signal</small><strong class="sig">Mix tailwind offsets cost pressure</strong></div><div class="flow-step"><small>Operating driver</small>Data-center mix and net price-cost</div><div class="flow-step"><small>Predicted metric</small><strong class="pred">EBITA margin: flat to +40 bps</strong></div><div class="flow-step"><small>Thesis status</small><strong class="thesis">Pass · growth is modestly accretive</strong></div></div><div class="output"><b>Confidence: <span class="conf">Medium</span></b> · Recency: illustrative Aug 2026 snapshot</div></article>
+    </div>
+    <div class="dashboard"><div class="dashboard-head"><div><h3>Combined thesis read</h3><p>Broad scenario ranges, not a fitted forecast.</p></div><div class="confidence"><b id="overall-confidence">Medium</b><span>evidence confidence</span></div></div><div class="metrics"><div class="metric"><span>Organic orders</span><b id="m-orders">+4% to +8%</b><em id="m-orders-note">Demand: mixed</em></div><div class="metric"><span>Backlog retained</span><b id="m-retention">91% to 95%</b><em id="m-retention-note">Quality: stable</em></div><div class="metric"><span>Quarterly conversion</span><b id="m-conversion">24% to 28%</b><em id="m-conversion-note">Capacity: balanced</em></div><div class="metric"><span>EBITA margin</span><b id="m-margin">Flat to +40 bps</b><em id="m-margin-note">Economics: neutral</em></div></div></div>
+    <p class="disclaimer"><b>What is real now:</b> the causal mapping, source taxonomy, and interactive workflow. <b>Built in Stage 2:</b> live data feeds, fitted priors, backtesting, Monte Carlo distributions, and production confidence scoring. All evidence and output ranges shown here are dated, illustrative examples, not current signals or investment advice.</p>
+  </section>
 
   <h2 id="s01" class="rv"><span class="num">01</span>Thesis</h2>
   <p class="rv"><span class="tag">Certain</span>JCI reports a record $16.6 billion company-wide backlog at fiscal year-end 2025, with Building Solutions backlog of $14.9 billion, up 13 percent organically year over year, against orders of $20.7 billion, up 7 percent (JCI FY2025 Form 10-K, filed November 14, 2025).</p>
@@ -588,6 +649,52 @@ const TEAL = '#10a37f', ROSE = '#d1495b', SLATE = '#565869';
     es.forEach(function(e){ if (e.isIntersecting){ host.classList.add('go'); obs.disconnect(); } });
   }, {threshold:.3}).observe(host);
 })();
+
+// ---------- Stage 1 evidence engines ----------
+(function(){
+  var data={
+    demand:[
+      {sig:'Capex and project signals roll over',pred:'Organic orders: -2% to +2%',thesis:'Pressure · durability thesis weakens',conf:'Low'},
+      {sig:'Mixed project and capex signals',pred:'Organic orders: +4% to +8%',thesis:'Watch · demand intact, visibility mixed',conf:'Medium'},
+      {sig:'Capex, permits, and project activity align',pred:'Organic orders: +9% to +14%',thesis:'Pass · durable demand supports re-rating',conf:'High'}],
+    backlog:[
+      {sig:'Deferral language and capex cuts rise',pred:'Backlog retained: 82% to 88%',thesis:'Pressure · headline backlog overstates value',conf:'Medium'},
+      {sig:'Limited deferrals; timing noise remains',pred:'Backlog retained: 91% to 95%',thesis:'Pass · quality supports conversion',conf:'Medium'},
+      {sig:'Low cancellation signals; service mix holds',pred:'Backlog retained: 96% to 98%',thesis:'Pass · backlog appears highly executable',conf:'High'}],
+    capacity:[
+      {sig:'Hiring lags openings; labor language worsens',pred:'Quarterly conversion: 18% to 22%',thesis:'Pressure · labor blocks revenue timing',conf:'Medium'},
+      {sig:'Hiring offsets normal attrition',pred:'Quarterly conversion: 24% to 28%',thesis:'Watch · capacity is adequate, not loose',conf:'Medium'},
+      {sig:'Hiring and training capacity broaden',pred:'Quarterly conversion: 29% to 33%',thesis:'Pass · capacity unlocks backlog',conf:'High'}],
+    mix:[
+      {sig:'Input costs outrun pricing and mix',pred:'EBITA margin: -80 to -30 bps',thesis:'Pressure · growth is not yet accretive',conf:'Medium'},
+      {sig:'Mix tailwind offsets cost pressure',pred:'EBITA margin: flat to +40 bps',thesis:'Pass · growth is modestly accretive',conf:'Medium'},
+      {sig:'Cooling mix rises as price-cost improves',pred:'EBITA margin: +50 to +100 bps',thesis:'Pass · growth translates into EPS',conf:'High'}]
+  };
+  var labels={demand:['weak','mixed','strong'],backlog:['fragile','stable','resilient'],capacity:['tight','balanced','expanding'],mix:['pressured','neutral','accretive']};
+  function updateOverall(){
+    var states={}; document.querySelectorAll('.engine').forEach(function(e){states[e.dataset.engine]=+e.dataset.level||1});
+    var d=data.demand[states.demand],b=data.backlog[states.backlog],c=data.capacity[states.capacity],m=data.mix[states.mix];
+    document.getElementById('m-orders').textContent=d.pred.replace('Organic orders: ','');
+    document.getElementById('m-retention').textContent=b.pred.replace('Backlog retained: ','');
+    document.getElementById('m-conversion').textContent=c.pred.replace('Quarterly conversion: ','');
+    document.getElementById('m-margin').textContent=m.pred.replace('EBITA margin: ','');
+    document.getElementById('m-orders-note').textContent='Demand: '+labels.demand[states.demand];
+    document.getElementById('m-retention-note').textContent='Quality: '+labels.backlog[states.backlog];
+    document.getElementById('m-conversion-note').textContent='Capacity: '+labels.capacity[states.capacity];
+    document.getElementById('m-margin-note').textContent='Economics: '+labels.mix[states.mix];
+    var avg=(states.demand+states.backlog+states.capacity+states.mix)/4;
+    document.getElementById('overall-confidence').textContent=avg>=1.65?'High':avg<=.35?'Low':'Medium';
+  }
+  document.querySelectorAll('.engine').forEach(function(engine){
+    engine.dataset.level='1';
+    engine.querySelectorAll('.state-btn').forEach(function(btn){btn.addEventListener('click',function(){
+      var level=+btn.dataset.level,x=data[engine.dataset.engine][level]; engine.dataset.level=level;
+      engine.querySelectorAll('.state-btn').forEach(function(b){b.classList.toggle('active',b===btn)});
+      engine.querySelector('.sig').textContent=x.sig;engine.querySelector('.pred').textContent=x.pred;engine.querySelector('.thesis').textContent=x.thesis;engine.querySelector('.conf').textContent=x.conf;updateOverall();
+    })});
+  }); updateOverall();
+})();
+
 </script>
 </body>
 </html>
