@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Backlog-Capacity Engine — Longaeva Stage 1 Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --ink-soft:#5b5f66;
+    --ink-faint:#9aa0a6;
+    --hair:#e8e8e6;
+    --hair-strong:#cfcfcc;
+    --bg:#ffffff;
+    --panel:#fafaf9;
+    --teal:#10a37f;
+    --teal-deep:#0c8a68;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--bg); scroll-behavior:smooth; }
+  body{
+    font-family:'Lora', Georgia, serif;
+    color:var(--ink);
+    font-size:19px;
+    line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .wrap{ max-width:820px; margin:0 auto; padding:64px 28px 140px; }
+
+  /* ---------- progress bar ---------- */
+  #progress{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background:var(--teal); z-index:60; transition:width .12s linear;
+  }
+
+  /* ---------- nav ---------- */
+  nav{
+    position:fixed; top:3px; left:0; right:0; z-index:50;
+    background:rgba(255,255,255,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--hair);
+    transform:translateY(-110%); transition:transform .35s ease;
+  }
+  nav.show{ transform:translateY(0); }
+  nav .rail{
+    max-width:1000px; margin:0 auto; padding:10px 20px;
+    display:flex; gap:18px; overflow-x:auto; scrollbar-width:none;
+    font-size:12px; letter-spacing:.1em; text-transform:uppercase; font-weight:600;
+  }
+  nav .rail::-webkit-scrollbar{ display:none; }
+  nav a{ color:var(--ink-faint); text-decoration:none; white-space:nowrap; transition:color .2s; }
+  nav a:hover{ color:var(--ink); }
+  nav a.active{ color:var(--teal-deep); border-bottom:2px solid var(--teal); padding-bottom:2px; }
+
+  /* ---------- hero ---------- */
+  .eyebrow{
+    font-size:12.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:600; margin:0 0 26px;
+  }
+  h1{
+    font-size:37px; line-height:1.16; font-weight:600;
+    letter-spacing:-.012em; margin:0 0 .35em;
+  }
+  .sub{ color:var(--ink-soft); font-style:italic; font-size:17px; margin:0 0 30px; }
+  .byline{
+    font-size:14.5px; color:var(--ink-soft);
+    border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);
+    padding:14px 0; margin:0 0 40px; display:flex; flex-wrap:wrap; gap:6px 26px;
+  }
+  .byline b{ color:var(--ink); font-weight:600; }
+
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:0 0 44px;
+  }
+  .stat{
+    border:1px solid var(--hair); border-radius:10px; padding:16px 14px 13px;
+    background:var(--panel); transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .stat:hover{ transform:translateY(-3px); box-shadow:0 8px 24px rgba(26,26,26,.07); border-color:var(--hair-strong); }
+  .stat .n{ font-size:27px; font-weight:700; letter-spacing:-.01em; color:var(--teal-deep); line-height:1.1; }
+  .stat .l{ font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin-top:6px; line-height:1.4; }
+
+  .abstract{ margin:0 0 8px; }
+  .abstract p{
+    font-size:20px; line-height:1.62; font-style:italic; color:#2c2c2c;
+    border-left:2px solid var(--ink); padding-left:22px; margin:0 0 40px;
+  }
+
+  h2{
+    font-size:14px; letter-spacing:.13em; text-transform:uppercase; font-weight:700;
+    margin:52px 0 6px; color:var(--ink);
+  }
+  h2 .num{ color:var(--ink-faint); margin-right:14px; font-weight:700; }
+  h3{ font-size:20px; font-weight:600; margin:30px 0 6px; letter-spacing:-.005em; }
+
+  p{ margin:0 0 18px; }
+  .lead{ font-size:20.5px; line-height:1.62; color:#242424; }
+
+  .tag{
+    font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:700;
+    color:#7a7f86; margin-right:9px;
+  }
+  a{ color:var(--ink); text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:2px; }
+
+  ul{ padding-left:1.15em; margin:0 0 20px; }
+  li{ margin:0 0 9px; }
+
+  table{ width:100%; border-collapse:collapse; font-size:14.5px; line-height:1.5; margin:20px 0 30px; }
+  th,td{ text-align:left; vertical-align:top; padding:12px 14px; border-bottom:1px solid var(--hair); }
+  thead th{
+    border-bottom:1.5px solid var(--hair-strong);
+    font-size:11.5px; letter-spacing:.07em; text-transform:uppercase; color:#3a3a3a; font-weight:700;
+  }
+  tbody tr:last-child td{ border-bottom:1px solid var(--hair-strong); }
+  td b{ font-weight:600; }
+
+  .figure{ margin:34px 0; }
+  .figure .cap{
+    font-size:13.5px; color:var(--ink-soft); font-style:italic;
+    margin-top:12px; text-align:center; line-height:1.5;
+  }
+  .chart{ width:100%; }
+  .chart text{ font-family:'Lora', Georgia, serif; }
+
+  hr{ border:0; border-top:1px solid var(--hair); margin:56px 0; }
+
+  /* ---------- mechanism cards ---------- */
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:24px 0 26px; }
+  .card{
+    border:1px solid var(--hair); border-radius:10px; padding:18px 18px 15px; background:#fff;
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .card:hover{ transform:translateY(-3px); box-shadow:0 10px 26px rgba(26,26,26,.08); border-color:var(--teal); }
+  .card .k{
+    font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700;
+    color:var(--teal-deep); margin:0 0 7px;
+  }
+  .card h4{ font-size:17px; font-weight:600; margin:0 0 6px; }
+  .card p{ font-size:15px; line-height:1.6; color:var(--ink-soft); margin:0; }
+
+  .duo{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:24px 0 10px; }
+  .duo .card:first-child{ border-top:3px solid var(--teal); }
+  .duo .card:last-child{ border-top:3px solid #565869; }
+
+  /* ---------- reveal ---------- */
+  .rv{ opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s ease; }
+  .rv.in{ opacity:1; transform:none; }
+  .rv.d1{ transition-delay:.08s; } .rv.d2{ transition-delay:.16s; }
+  .rv.d3{ transition-delay:.24s; } .rv.d4{ transition-delay:.32s; }
+
+  /* ---------- interactive driver graph ---------- */
+  #graphwrap{ position:relative; }
+  #drivergraph{ width:100%; height:auto; display:block; }
+  #drivergraph .node{ cursor:pointer; }
+  #drivergraph .node rect{ transition:filter .2s ease, stroke-width .2s ease; }
+  #drivergraph .node:hover rect{ filter:brightness(1.12); }
+  #drivergraph .node.sel rect{ stroke:#1a1a1a; stroke-width:2.5; }
+  #drivergraph .edge{ stroke:#9aa0a6; stroke-width:1.6; fill:none; marker-end:url(#arr); }
+  #drivergraph text{ font-family:'Lora', Georgia, serif; pointer-events:none; }
+
+  #nodepanel{
+    border:1px solid var(--hair); border-left:3px solid var(--teal);
+    border-radius:0 10px 10px 0; background:var(--panel);
+    padding:18px 22px 16px; margin:6px 0 8px; min-height:118px;
+    transition:opacity .3s ease;
+  }
+  #nodepanel h4{ margin:0 0 4px; font-size:18px; }
+  #nodepanel .meta{ font-size:12px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); font-weight:600; margin:0 0 10px; }
+  #nodepanel p{ font-size:15.5px; line-height:1.6; color:var(--ink-soft); margin:0 0 8px; }
+  #nodepanel .hint{ font-style:italic; color:var(--ink-faint); }
+
+  /* fan animation */
+  #fan .band, #fan .medline, #fan .meddot{ opacity:0; transition:opacity 1s ease .15s; }
+  #fan .medline{ stroke-dasharray:1200; stroke-dashoffset:1200; transition:stroke-dashoffset 1.6s ease .3s, opacity .3s ease .15s; }
+  #fan.go .band{ opacity:1; }
+  #fan.go .meddot{ opacity:1; transition-delay:.9s; }
+  #fan.go .medline{ opacity:1; stroke-dashoffset:0; }
+
+  /* waterfall animation */
+  #waterfall rect.bar{ transform:scaleY(0); transform-box:fill-box; transform-origin:bottom; transition:transform .8s cubic-bezier(.2,.8,.25,1); }
+  #waterfall.go rect.bar{ transform:scaleY(1); }
+
+  @media (max-width:640px){
+    body{ font-size:17px; }
+    .wrap{ padding:48px 20px 100px; }
+    h1{ font-size:29px; }
+    .stats{ grid-template-columns:1fr 1fr; }
+    .cards, .duo{ grid-template-columns:1fr; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{ scroll-behavior:auto; }
+    .rv{ opacity:1; transform:none; transition:none; }
+    #fan .band, #fan .medline, #fan .meddot{ opacity:1; transition:none; stroke-dashoffset:0; }
+    #waterfall rect.bar{ transform:none; transition:none; }
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav"><div class="rail">
+  <a href="#s01">Thesis</a><a href="#s02">Why JCI</a><a href="#s03">Architecture</a><a href="#s04">Stochastic</a><a href="#s05">Real-Time</a><a href="#s06">LLM Layer</a><a href="#s07">Evidence</a><a href="#s08">Edge</a><a href="#s09">Attribution</a><a href="#s10">Scale</a><a href="#s11">Plan</a><a href="#s12">Ask</a>
+</div></nav>
+<div class="wrap">
+
+  <div class="eyebrow rv">Longaeva · Businesses, Not Numbers · September 2026</div>
+
+  <h1 class="rv d1">The Backlog-Capacity Engine</h1>
+  <div class="sub rv d2">Simulating Johnson Controls International (NYSE: JCI) as a production system, not a spreadsheet.</div>
+
+  <div class="byline rv d3">
+    <span><b>Stage 1</b> · Written Proposal</span>
+    <span>Primary company: <b>Johnson Controls (JCI)</b></span>
+    <span>Submitted by: <b>Sonia Bhushan Parikh</b></span>
+  </div>
+
+  <div class="stats rv d4">
+    <div class="stat"><div class="n" data-target="16.6" data-decimals="1" data-prefix="$" data-suffix="B">$0.0B</div><div class="l">Record company-wide backlog, FYE25</div></div>
+    <div class="stat"><div class="n" data-target="14.9" data-decimals="1" data-prefix="$" data-suffix="B">$0.0B</div><div class="l">Building Solutions backlog</div></div>
+    <div class="stat"><div class="n" data-target="13" data-decimals="0" data-prefix="+" data-suffix="%">+0%</div><div class="l">Organic backlog growth YoY</div></div>
+    <div class="stat"><div class="n" data-target="10000" data-decimals="0" data-prefix="~" data-suffix="">~0</div><div class="l">M&amp;A events in the training corpus</div></div>
+  </div>
+
+  <div class="abstract rv">
+    <p>Reported backlog is one number that hides the machine under it. This proposal models JCI as a causal driver graph: orders become backlog, backlog converts to revenue at a rate set by field-labor capacity, and a shift toward data-center cooling moves margin. Run forward under stochastic scenarios, it estimates the distribution of revenue, margin, and EPS paths, and traces every move back to a dated signal.</p>
+  </div>
+
+  <h2 id="s01" class="rv"><span class="num">01</span>Thesis</h2>
+  <p class="rv"><span class="tag">Certain</span>JCI reports a record $16.6 billion company-wide backlog at fiscal year-end 2025, with Building Solutions backlog of $14.9 billion, up 13 percent organically year over year, against orders of $20.7 billion, up 7 percent (JCI FY2025 Form 10-K, filed November 14, 2025).</p>
+  <p class="rv">The standard sell-side model treats this as one number and rolls it forward on a historical conversion rate. That breaks in the environment JCI now operates in: a mix shift toward data-center thermal management, a CEO six quarters into the job, and a labor-constrained field workforce that sets how fast backlog becomes revenue. This proposal models the mechanics behind the backlog number, not the number itself, so it can run forward under different capacity, labor, and demand-mix scenarios.</p>
+
+  <h2 id="s02" class="rv"><span class="num">02</span>Why Johnson Controls</h2>
+  <ul class="rv">
+    <li>Backlog and orders are disclosed at segment and regional granularity, giving ground truth to calibrate and backtest against, which most industrials do not provide.</li>
+    <li>The business is mid-transition: JCI sold its residential and light commercial unit to Bosch for $8.1 billion in 2024, a year early, to concentrate on commercial buildings. Structural breaks are where point-estimate models fail and scenario models earn their keep.</li>
+    <li>Data-center thermal management is now the disclosed growth driver. Management tied Americas segment growth of 9 percent last quarter to data-center cooling and raised full-year adjusted EPS guidance to $4.85 from $4.70. This is a fast-moving demand shock with a short public data trail, which rewards an alternative-data approach over a model trained on ten years of steady state.</li>
+  </ul>
+  <p class="rv"><span class="tag">Likely</span>The market still prices JCI on legacy HVAC and fire-and-security multiples rather than a re-rated growth vertical, the kind of mispricing a driver-based simulation surfaces. Stage 2 tests this rather than assuming it.</p>
+
+  <h2 id="s03" class="rv"><span class="num">03</span>Simulation Architecture</h2>
+  <p class="rv">The system is a causal driver graph, not an end-to-end machine-learning model. Each node is a business quantity with a structural equation drawn from how a systems-and-services business converts demand into revenue. A graph the team can inspect and defend beats a model that fits history but cannot explain itself to a judge or a portfolio manager.</p>
+  <p class="rv"><b>Click any node</b> to see its definition, inputs, and what it feeds.</p>
+
+  <div class="figure rv" id="graphwrap">
+    <svg id="drivergraph" viewBox="0 0 980 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Interactive causal driver graph">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#9aa0a6"/>
+        </marker>
+      </defs>
+      <path class="edge" d="M 192 66 L 208 66"/>
+      <path class="edge" d="M 388 66 L 404 66"/>
+      <path class="edge" d="M 584 66 L 600 66"/>
+      <path class="edge" d="M 780 66 L 796 66"/>
+      <path class="edge" d="M 494 176 L 494 96"/>
+      <path class="edge" d="M 388 214 L 600 214"/>
+      <path class="edge" d="M 780 214 C 830 214, 852 150, 872 100"/>
+      <path class="edge" d="M 330 176 C 420 120, 690 96, 792 84"/>
+      <path class="edge" d="M 720 346 C 770 280, 845 160, 868 100"/>
+      <g class="node" data-node="oi"><rect x="12" y="38" width="180" height="56" rx="9" fill="#10a37f"/><text x="102" y="71" text-anchor="middle" font-size="16" fill="#fff">Order Intake</text></g>
+      <g class="node" data-node="bl"><rect x="208" y="38" width="180" height="56" rx="9" fill="#1a7f64"/><text x="298" y="71" text-anchor="middle" font-size="16" fill="#fff">Backlog</text></g>
+      <g class="node" data-node="cv"><rect x="404" y="38" width="180" height="56" rx="9" fill="#e0913b"/><text x="494" y="71" text-anchor="middle" font-size="16" fill="#fff">Conversion Rate</text></g>
+      <g class="node" data-node="rev"><rect x="600" y="38" width="180" height="56" rx="9" fill="#7c5cff"/><text x="690" y="71" text-anchor="middle" font-size="16" fill="#fff">Revenue</text></g>
+      <g class="node" data-node="mg"><rect x="796" y="38" width="172" height="56" rx="9" fill="#d1495b"/><text x="882" y="71" text-anchor="middle" font-size="16" fill="#fff">Margin / EPS</text></g>
+      <g class="node" data-node="vm"><rect x="208" y="186" width="180" height="56" rx="9" fill="#b5843b"/><text x="298" y="219" text-anchor="middle" font-size="16" fill="#fff">Vertical Mix Shift</text></g>
+      <g class="node" data-node="cap"><rect x="404" y="176" width="180" height="56" rx="9" fill="#565869"/><text x="494" y="211" text-anchor="middle" font-size="16" fill="#fff">Capacity / Labor</text></g>
+      <g class="node" data-node="pp"><rect x="600" y="186" width="180" height="56" rx="9" fill="#2e7d5b"/><text x="690" y="219" text-anchor="middle" font-size="16" fill="#fff">Pricing Power</text></g>
+      <g class="node" data-node="ic"><rect x="600" y="326" width="180" height="56" rx="9" fill="#6b7280"/><text x="690" y="361" text-anchor="middle" font-size="16" fill="#fff">Input Costs</text></g>
+    </svg>
+    <div id="nodepanel">
+      <h4>The driver graph</h4>
+      <div class="meta">Interactive</div>
+      <p class="hint">Select a node above to inspect its definition, primary inputs, and what it feeds.</p>
+    </div>
+    <div class="cap">Figure 1 — The causal driver graph. Orders feed backlog; backlog converts to revenue at a rate gated by field-labor capacity; the data-center mix shift and input costs set margin.</div>
+  </div>
+
+  <table class="rv">
+    <thead><tr><th>Driver node</th><th>Definition</th><th>Primary inputs</th><th>Feeds into</th></tr></thead>
+    <tbody>
+      <tr><td><b>Order Intake</b></td><td>New bookings by segment (Building Solutions NA / EMEA-LA / APAC, Global Products)</td><td>Quarterly orders disclosure; data-center RFP activity; hyperscaler capex guidance</td><td>Backlog</td></tr>
+      <tr><td><b>Backlog</b></td><td>Contracted revenue not yet recognized ($16.6B total, $14.9B Building Solutions at FYE25)</td><td>Order intake; cancellation rate; contract mix (systems vs service)</td><td>Conversion</td></tr>
+      <tr><td><b>Capacity / Labor</b></td><td>Field technician and installation-crew availability</td><td>Job postings (HVAC / controls technician reqs); union-hall data; 10-K labor-risk disclosures</td><td>Conversion rate</td></tr>
+      <tr><td><b>Conversion Rate</b></td><td>Share of backlog recognized as revenue per quarter</td><td>Historical conversion cadence by segment; capacity node</td><td>Revenue</td></tr>
+      <tr><td><b>Vertical Mix Shift</b></td><td>Revenue tied to data-center thermal management vs legacy HVAC / fire / security</td><td>Transcript keyword tagging; product-launch cadence (Silent-Aire, YDAM, absorption chillers)</td><td>Margin, pricing power</td></tr>
+      <tr><td><b>Input Costs</b></td><td>Steel, copper, refrigerant, compressor components</td><td>PPI series; supplier 8-Ks; tariff-exposure disclosures</td><td>Margin</td></tr>
+      <tr><td><b>Pricing Power</b></td><td>Ability to pass input-cost inflation through to Systems and Service pricing</td><td>Segment EBITA margin trend; competitive intensity (Trane, Carrier, Schneider)</td><td>Margin, EPS</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="s04" class="rv"><span class="num">04</span>The Stochastic Layer</h2>
+  <p class="rv">Each edge carries a distribution, not a point estimate. Order-intake shocks, cancellation risk, technician attrition, and input-cost inflation are drawn from fitted distributions and propagated through the graph by Monte Carlo, 5,000 to 10,000 runs per scenario. The output is a distribution of revenue, margin, and EPS paths per quarter, not one forecast line.</p>
+  <p class="rv"><span class="tag">Design choice</span>Fitted on what data? Not the quarter around the divestment alone — one regime, one macro backdrop, and a near-certain overfit. Not the full yearly history unadjusted either — that averages across the Bosch structural break and treats a company that no longer exists as the population. The fitting window is regime-aware: JCI's post-divestment quarters where they exist, pooled with comparable industrial events to supply the variance structure a short history cannot. The Bosch sale closed in 2024, so the post-break sample is a handful of quarters. That short-history problem is the foundation of Section 06, not a footnote.</p>
+
+  <div class="figure rv">
+    <div id="fan" class="chart"></div>
+    <div class="cap">Figure 2 — Illustrative simulated revenue distribution across eight quarters. Bands show the P10–P90 and P25–P75 intervals around the median path; shape and levels are schematic, not a forecast.</div>
+  </div>
+
+  <h2 id="s05" class="rv"><span class="num">05</span>Lagging Indicators, Real Time</h2>
+  <p class="rv lead">The capacity and labor nodes are lagging indicators. Job postings, headcount disclosures, and union-hall data all arrive backdated — the model sees the labor constraint weeks after the field feels it. Left alone, the simulation would steer by the rearview mirror. Four mechanisms pull it toward real time.</p>
+  <div class="cards">
+    <div class="card rv"><div class="k">Mechanism 1</div><h4>Backdated event studies</h4><p>Measure how previous events — large order wins, the divestment integration, seasonal hiring ramps — actually moved capacity and labor metrics, and learn the true lag structure instead of assuming one.</p></div>
+    <div class="card rv d1"><div class="k">Mechanism 2</div><h4>Autoregressive nowcasting</h4><p>Fit autoregressive dynamics on the lagged series to project the unobserved present — an AR simulation that brings backdated data toward real time with an honest error band around it.</p></div>
+    <div class="card rv d2"><div class="k">Mechanism 3</div><h4>On-the-ground reporting</h4><p>Subsidize the slow series with fast ones: hiring-signal scrapes, field-level checks, union and apprentice chatter, and management commentary, each weighted by how reliably it has led the official print.</p></div>
+    <div class="card rv d3"><div class="k">Mechanism 4</div><h4>Constantly updating assumptions</h4><p>Because the inputs are delayed, every assumption carries a recency stamp and a decay rate. Each new print re-anneals the model, so stale inputs decay out instead of silently driving the forecast.</p></div>
+  </div>
+
+  <h2 id="s06" class="rv"><span class="num">06</span>The LLM Layer</h2>
+  <p class="rv lead">Short history is the binding constraint: a model fitted on a handful of post-divestment quarters has almost no degrees of freedom. The fix is not more Monte Carlo — propagation cannot manufacture variance the fitting window never saw. The fix is a larger population: a corpus of roughly 10,000 M&amp;A and divestment events.</p>
+  <div class="duo">
+    <div class="card rv"><div class="k">Fine-tuning</div><h4>Pattern transfer from the deal corpus</h4><p>Fine-tune an LLM on the ~10,000-deal corpus so the distribution layer inherits how comparable structural breaks — spins, divestments, portfolio reshapes — actually resolved: how long capacity lagged, how conversion wobbled, how margin re-mixed. It sits on top of the stochastic layer: the corpus informs the priors, the Monte Carlo propagates them.</p></div>
+    <div class="card rv d1"><div class="k">NLP retrieval</div><h4>The live quarterly signal</h4><p>Keyword tagging and transcript retrieval across the live quarterly record — backlog, lead-time, and capacity language quarter over quarter — catches inflections before they reach reported numbers. No training, nothing to overfit. Right tool for the right job: both are offered, each where it is strongest.</p></div>
+  </div>
+  <div class="card rv d2" style="border-top:3px solid var(--ink);">
+    <div class="k" style="color:var(--ink);">Training set vs goal set</div>
+    <h4>The overfitting guard, stated plainly</h4>
+    <p>The training set is the deal corpus and historical events. The goal set is JCI's live forward path. The two stay strictly separate: transfer is validated on held-out deals, never on the company being forecast. The short-history worry is legitimate, so the model earns its confidence on deals it has never seen.</p>
+  </div>
+
+  <h2 id="s07" class="rv"><span class="num">07</span>Evidence and Data Inputs</h2>
+  <p class="rv">Ranked by signal-to-effort, anchored on observable sources rather than one clean feed:</p>
+  <ul class="rv">
+    <li>SEC filings (10-K, 10-Q, 8-K) for segment backlog, orders, EBITA margin by region, and stated risk factors on labor and supply chain.</li>
+    <li>Earnings-call transcripts, keyword-tagged for backlog, lead-time, and capacity language quarter over quarter, to catch inflections before they reach reported numbers.</li>
+    <li>Job-posting volume for HVAC and controls technician roles (Indeed, LinkedIn) as a leading indicator of capacity or a binding labor constraint, checked against management commentary on skilled-labor shortages.</li>
+    <li>Product-launch and partnership cadence (Silent-Aire coolant distribution units, YDAM magnetic-bearing chiller, absorption-chiller waste-heat recovery, the Accelsius liquid-cooling investment) as a proxy for data-center positioning, since that segment is not broken out.</li>
+    <li>Trade press and industry data (rack-density trends, cooling as a share of data-center power draw) to size and time the demand-mix shift independent of company disclosure.</li>
+  </ul>
+  <p class="rv"><span class="tag">Guessing</span>Social-sentiment scraping is excluded as a primary input. JCI is a B2B industrial name bought by facility engineers and hyperscale procurement teams, not retail sentiment. Revisited only if a mentor flags a specific consumer-facing use case.</p>
+
+  <h2 id="s08" class="rv"><span class="num">08</span>Differentiation</h2>
+  <p class="rv">Standard approaches, a DCF off consensus, a regression of revenue on historical conversion, or a sentiment-scored NLP model, serve only as a baseline cross-check, never the core. The core is the structural driver graph, harder to replicate because it needs judgment about how a systems-and-services business works, not access to the same filings everyone can download.</p>
+
+  <h2 id="s09" class="rv"><span class="num">09</span>Interpretability</h2>
+  <p class="rv">Every run produces a driver-attribution waterfall: which node moved the output, in which direction, by how much, tied to the filing, transcript passage, or signal that drove it. A judge or PM can trace any output back to a dated, sourced input.</p>
+
+  <div class="figure rv">
+    <div id="waterfall" class="chart"></div>
+    <div class="cap">Figure 3 — Illustrative EPS attribution. Each bar is one driver's contribution to the modeled path, positive or negative, bridging the base to the simulated result. Values are schematic.</div>
+  </div>
+
+  <h2 id="s10" class="rv"><span class="num">10</span>Scale</h2>
+  <p class="rv">The structural-equation template (order intake, backlog, capacity, conversion, mix shift, cost, pricing power) fits any systems-and-services industrial with a disclosed backlog: building-automation peers, elevator and escalator makers, industrial-automation suppliers. Per name, the work is calibrating six to eight parameters, not rebuilding the graph. That is the scale argument the rules ask for: one pipeline, one evaluation method, applied name by name.</p>
+  <p class="rv"><span class="tag">Design choice</span>The calibration, though, is not generic. Each sector has different field-labor bottlenecks and capacity constraints — elevator modernization crews are not HVAC technicians — so parameters transfer through a mapping, not raw. One worked comparable makes the claim testable:</p>
+  <table class="rv">
+    <thead><tr><th>Parameter</th><th>JCI / building solutions</th><th>Worked comparable: elevator &amp; escalator service</th></tr></thead>
+    <tbody>
+      <tr><td><b>Capacity constraint</b></td><td>HVAC / controls field-technician pool</td><td>Modernization and install-crew pool</td></tr>
+      <tr><td><b>Labor bottleneck</b></td><td>Skilled controls technicians, union hall supply</td><td>Certified elevator mechanics, license-gated</td></tr>
+      <tr><td><b>Mix shift</b></td><td>Data-center thermal vs legacy HVAC / fire / security</td><td>Modernization vs new-equipment installs</td></tr>
+      <tr><td><b>Conversion cadence</b></td><td>Systems backlog vs service attachment</td><td>Repair backlog vs maintenance-contract renewal</td></tr>
+      <tr><td><b>Input costs</b></td><td>Copper, steel, refrigerant, compressors</td><td>Steel, electronics, wire rope</td></tr>
+    </tbody>
+  </table>
+  <p class="rv">One worked example is also easier to attack. That is fine: Stage 2 applies the mapping to a second name as the proof of cross-sector transfer, rather than asking the reader to take the generalization on faith.</p>
+
+  <h2 id="s11" class="rv"><span class="num">11</span>Stage 2 Plan</h2>
+  <table class="rv">
+    <thead><tr><th>Week</th><th>Milestone</th><th>Deliverable</th></tr></thead>
+    <tbody>
+      <tr><td><b>Wk 3</b></td><td>Structural equation set finalized; backlog and capacity nodes coded</td><td>Driver graph v1 (Python, networkx + custom solver)</td></tr>
+      <tr><td><b>Wk 4</b></td><td>Alt-data pipeline live: job-postings scrape, transcript keyword tagger</td><td>Midpoint check-in demo with live capacity signal</td></tr>
+      <tr><td><b>Wk 5</b></td><td>Monte Carlo stochastic layer; scenario interface</td><td>Working prototype: distribution of revenue / margin paths</td></tr>
+      <tr><td><b>Wk 6–7</b></td><td>Attribution waterfall; backtest against FY24–FY25 actuals; finals deck</td><td>Live demo + implementation and scale roadmap</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="s12" class="rv"><span class="num">12</span>Team and Ask</h2>
+  <p class="rv">Solo submission. Requested from Longaeva under the Stage 2 NDA: access to internal alternative-data feeds relevant to industrial or building-solutions names, and mentor time to pressure-test the structural equations against how an investment team underwrites backlog-conversion risk.</p>
+
+</div>
+
+<script>
+// ---------- progress + nav ----------
+(function(){
+  var nav = document.getElementById('nav'), bar = document.getElementById('progress');
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+    nav.classList.toggle('show', h.scrollTop > 320);
+  }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting){
+        links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+      }
+    });
+  }, {rootMargin:'-30% 0px -60% 0px'});
+  secs.forEach(function(s){ if (s) io.observe(s); });
+})();
+
+// ---------- reveal ----------
+(function(){
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting){
+        e.target.classList.add('in');
+        if (e.target.id === 'fanwrap' || e.target.querySelector && e.target.querySelector('#fan')) {}
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold:.12});
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+})();
+
+// ---------- counters ----------
+(function(){
+  function fmt(v, d, pre, suf){
+    var s = d > 0 ? v.toFixed(d) : Math.round(v).toLocaleString('en-US');
+    return pre + s + suf;
+  }
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (!e.isIntersecting) return;
+      var el = e.target, t = parseFloat(el.dataset.target), d = parseInt(el.dataset.decimals,10),
+          pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
+      if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches){
+        el.textContent = fmt(t, d, pre, suf); io.unobserve(el); return;
+      }
+      var t0 = null, dur = 1400;
+      function step(ts){
+        if (!t0) t0 = ts;
+        var p = Math.min((ts - t0) / dur, 1), ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(t * ease, d, pre, suf);
+        if (p < 1) requestAnimationFrame(step); else el.textContent = fmt(t, d, pre, suf);
+      }
+      requestAnimationFrame(step);
+      io.unobserve(el);
+    });
+  }, {threshold:.4});
+  document.querySelectorAll('.stat .n').forEach(function(el){ io.observe(el); });
+})();
+
+// ---------- driver graph interaction ----------
+(function(){
+  var data = {
+    oi:  { t:'Order Intake', m:'Node 1 of 9 · Feeds Backlog', d:'New bookings by segment: Building Solutions NA, EMEA-LA, APAC, and Global Products.', i:'Quarterly orders disclosure; data-center RFP activity; hyperscaler capex guidance.' },
+    bl:  { t:'Backlog', m:'Node 2 of 9 · Feeds Conversion', d:'Contracted revenue not yet recognized: $16.6B total, $14.9B Building Solutions at FYE25.', i:'Order intake; cancellation rate; contract mix (systems vs service).' },
+    cv:  { t:'Conversion Rate', m:'Node 3 of 9 · Feeds Revenue', d:'Share of backlog recognized as revenue per quarter. The hinge of the whole model: this is where the labor constraint binds.', i:'Historical conversion cadence by segment; the Capacity / Labor node.' },
+    rev: { t:'Revenue', m:'Node 4 of 9 · Feeds Margin / EPS', d:'Recognized revenue per quarter, by segment.', i:'Conversion of backlog at the modeled rate.' },
+    mg:  { t:'Margin / EPS', m:'Node 5 of 9 · Terminal node', d:'Segment EBITA margin through to adjusted EPS. The output the simulation distributes.', i:'Revenue; vertical mix; pricing power; input costs.' },
+    cap: { t:'Capacity / Labor', m:'Node 6 of 9 · Gates Conversion', d:'Field technician and installation-crew availability — and a lagging indicator. Postings, headcount, and union data all arrive backdated, so Section 05 wraps this node in event studies, autoregressive nowcasting, on-the-ground reporting, and constantly updating assumptions to pull it toward real time.', i:'Job postings (HVAC / controls technician reqs); union-hall data; 10-K labor-risk disclosures.' },
+    vm:  { t:'Vertical Mix Shift', m:'Node 7 of 9 · Feeds Margin and Pricing Power', d:'Revenue tied to data-center thermal management vs legacy HVAC, fire, and security.', i:'Transcript keyword tagging; product-launch cadence (Silent-Aire, YDAM, absorption chillers).' },
+    pp:  { t:'Pricing Power', m:'Node 8 of 9 · Feeds Margin / EPS', d:'Ability to pass input-cost inflation through to Systems and Service pricing.', i:'Segment EBITA margin trend; competitive intensity (Trane, Carrier, Schneider).' },
+    ic:  { t:'Input Costs', m:'Node 9 of 9 · Feeds Margin / EPS', d:'Steel, copper, refrigerant, and compressor components.', i:'PPI series; supplier 8-Ks; tariff-exposure disclosures.' }
+  };
+  var panel = document.getElementById('nodepanel');
+  var nodes = Array.prototype.slice.call(document.querySelectorAll('#drivergraph .node'));
+  function select(id, push){
+    var d = data[id]; if (!d) return;
+    nodes.forEach(function(n){ n.classList.toggle('sel', n.dataset.node === id); });
+    panel.style.opacity = 0;
+    setTimeout(function(){
+      panel.innerHTML = '<h4>' + d.t + '</h4><div class="meta">' + d.m + '</div><p>' + d.d + '</p><p><b style="color:#1a1a1a">Primary inputs:</b> ' + d.i + '</p>';
+      panel.style.opacity = 1;
+    }, 160);
+    if (push !== false && history.replaceState) history.replaceState(null, '', '#node-' + id);
+  }
+  nodes.forEach(function(n){
+    n.addEventListener('click', function(){ select(n.dataset.node); });
+  });
+  var h = location.hash || '';
+  if (h.indexOf('#node-') === 0) select(h.slice(6), false);
+})();
+
+// ---------- chart helpers ----------
+const NS = 'http://www.w3.org/2000/svg';
+const AXIS = '#c9c9c6', GRID = '#eeeeec', LABEL = '#5b5f66', INK = '#1a1a1a';
+const TEAL = '#10a37f', ROSE = '#d1495b', SLATE = '#565869';
+
+// ---------- Figure 2: revenue fan ----------
+(function drawFan(){
+  const W = 760, H = 380, m = { t: 26, r: 20, b: 46, l: 54 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const q   = ['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8'];
+  const med = [6.60,6.80,7.02,7.25,7.50,7.78,8.08,8.38];
+  const p75 = [6.72,6.98,7.24,7.54,7.86,8.20,8.60,9.05];
+  const p25 = [6.50,6.66,6.82,7.00,7.20,7.42,7.66,7.92];
+  const p90 = [6.82,7.14,7.50,7.92,8.34,8.80,9.30,9.85];
+  const p10 = [6.44,6.54,6.62,6.76,6.92,7.08,7.24,7.40];
+  const yMin = 6.0, yMax = 10.0;
+  const X = i => m.l + (iw * i) / (q.length - 1);
+  const Y = v => m.t + ih * (1 - (v - yMin) / (yMax - yMin));
+  const band = (hi, lo) => {
+    let d = 'M ' + X(0) + ' ' + Y(hi[0]);
+    for (let i = 1; i < hi.length; i++) d += ' L ' + X(i) + ' ' + Y(hi[i]);
+    for (let i = lo.length - 1; i >= 0; i--) d += ' L ' + X(i) + ' ' + Y(lo[i]);
+    return d + ' Z';
+  };
+  const line = a => a.map((v,i) => (i? 'L':'M') + ' ' + X(i) + ' ' + Y(v)).join(' ');
+
+  let s = '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" xmlns="'+NS+'" role="img" aria-label="Simulated revenue distribution">';
+  for (let v = 6; v <= 10; v += 1) {
+    s += '<line x1="'+m.l+'" y1="'+Y(v)+'" x2="'+(W-m.r)+'" y2="'+Y(v)+'" stroke="'+GRID+'" stroke-width="1"/>';
+    s += '<text x="'+(m.l-10)+'" y="'+(Y(v)+4)+'" text-anchor="end" font-size="12" fill="'+LABEL+'">$'+v+'B</text>';
+  }
+  s += '<path class="band" d="'+band(p90,p10)+'" fill="'+TEAL+'" fill-opacity="0.12"/>';
+  s += '<path class="band" d="'+band(p75,p25)+'" fill="'+TEAL+'" fill-opacity="0.24"/>';
+  s += '<path class="medline" d="'+line(med)+'" fill="none" stroke="'+TEAL+'" stroke-width="2.4"/>';
+  med.forEach((v,i)=> s += '<circle class="meddot" cx="'+X(i)+'" cy="'+Y(v)+'" r="2.6" fill="'+TEAL+'"/>');
+  s += '<line x1="'+m.l+'" y1="'+(m.t+ih)+'" x2="'+(W-m.r)+'" y2="'+(m.t+ih)+'" stroke="'+AXIS+'" stroke-width="1.2"/>';
+  q.forEach((lab,i)=> s += '<text x="'+X(i)+'" y="'+(m.t+ih+22)+'" text-anchor="middle" font-size="12" fill="'+LABEL+'">'+lab+'</text>');
+  const lx = m.l + 4, ly = m.t + 6;
+  s += '<rect x="'+lx+'" y="'+ly+'" width="26" height="10" fill="'+TEAL+'" fill-opacity="0.24"/>';
+  s += '<text x="'+(lx+34)+'" y="'+(ly+9)+'" font-size="12" fill="'+LABEL+'">P25–P75</text>';
+  s += '<rect x="'+(lx+108)+'" y="'+ly+'" width="26" height="10" fill="'+TEAL+'" fill-opacity="0.12"/>';
+  s += '<text x="'+(lx+142)+'" y="'+ly+'" font-size="12" fill="'+LABEL+'">P10–P90</text>';
+  s += '<line x1="'+(lx+214)+'" y1="'+(ly+5)+'" x2="'+(lx+240)+'" y2="'+(ly+5)+'" stroke="'+TEAL+'" stroke-width="2.4"/>';
+  s += '<text x="'+(lx+248)+'" y="'+(ly+9)+'" font-size="12" fill="'+LABEL+'">Median</text>';
+  s += '</svg>';
+  var host = document.getElementById('fan');
+  host.innerHTML = s;
+  new IntersectionObserver(function(es, obs){
+    es.forEach(function(e){ if (e.isIntersecting){ host.classList.add('go'); obs.disconnect(); } });
+  }, {threshold:.3}).observe(host);
+})();
+
+// ---------- Figure 3: attribution waterfall ----------
+(function drawWaterfall(){
+  const items = [
+    { label:'FY25 base', value:4.70, type:'total' },
+    { label:'Data-center mix', value:+0.22, type:'inc' },
+    { label:'Backlog conversion', value:+0.12, type:'inc' },
+    { label:'Input costs', value:-0.09, type:'dec' },
+    { label:'Pricing power', value:+0.07, type:'inc' },
+    { label:'Labor constraint', value:-0.05, type:'dec' },
+    { label:'Modeled EPS', value:4.97, type:'total' }
+  ];
+  const W = 760, H = 380, m = { t: 24, r: 18, b: 64, l: 46 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const yMin = 4.4, yMax = 5.2;
+  const Y = v => m.t + ih * (1 - (v - yMin) / (yMax - yMin));
+  const n = items.length, gap = 0.32;
+  const bw = iw / (n + (n - 1) * gap);
+  const step = bw * (1 + gap);
+  const colFor = t => t === 'inc' ? TEAL : t === 'dec' ? ROSE : SLATE;
+
+  let s = '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" xmlns="'+NS+'" role="img" aria-label="EPS attribution waterfall">';
+  for (let v = 4.4; v <= 5.2001; v += 0.2) {
+    const vv = Math.round(v*100)/100;
+    s += '<line x1="'+m.l+'" y1="'+Y(vv)+'" x2="'+(W-m.r)+'" y2="'+Y(vv)+'" stroke="'+GRID+'" stroke-width="1"/>';
+    s += '<text x="'+(m.l-8)+'" y="'+(Y(vv)+4)+'" text-anchor="end" font-size="12" fill="'+LABEL+'">$'+vv.toFixed(2)+'</text>';
+  }
+  let cum = 0;
+  items.forEach((it,i)=>{
+    const x = m.l + i * step;
+    let yTop, yBot, labelVal;
+    if (it.type === 'total'){
+      yTop = Y(it.value); yBot = Y(yMin);
+      cum = it.value; labelVal = '$'+it.value.toFixed(2);
+    } else {
+      const start = cum, end = cum + it.value;
+      yTop = Y(Math.max(start,end)); yBot = Y(Math.min(start,end));
+      cum = end; labelVal = (it.value>0?'+':'−')+Math.abs(it.value).toFixed(2);
+    }
+    const h = Math.max(yBot - yTop, 2);
+    s += '<rect class="bar" style="transition-delay:'+(i*90)+'ms" x="'+x+'" y="'+yTop+'" width="'+bw+'" height="'+h+'" rx="2" fill="'+colFor(it.type)+'"/>';
+    if (i < n-1 && it.type!=='total' || (it.type==='total' && i===0)){
+      const cy = Y(cum);
+      s += '<line x1="'+x+'" y1="'+cy+'" x2="'+(x+step)+'" y2="'+cy+'" stroke="#c9c9c6" stroke-width="1" stroke-dasharray="3 3"/>';
+    }
+    s += '<text x="'+(x+bw/2)+'" y="'+(yTop-7)+'" text-anchor="middle" font-size="12.5" font-weight="600" fill="'+INK+'">'+labelVal+'</text>';
+    const words = it.label.split(' ');
+    const yBase = m.t + ih + 20;
+    if (words.length > 1 && it.label.length > 9){
+      s += '<text x="'+(x+bw/2)+'" y="'+yBase+'" text-anchor="middle" font-size="11.5" fill="'+LABEL+'">'+words[0]+'</text>';
+      s += '<text x="'+(x+bw/2)+'" y="'+(yBase+14)+'" text-anchor="middle" font-size="11.5" fill="'+LABEL+'">'+words.slice(1).join(' ')+'</text>';
+    } else {
+      s += '<text x="'+(x+bw/2)+'" y="'+yBase+'" text-anchor="middle" font-size="11.5" fill="'+LABEL+'">'+it.label+'</text>';
+    }
+  });
+  s += '<line x1="'+m.l+'" y1="'+Y(yMin)+'" x2="'+(W-m.r)+'" y2="'+Y(yMin)+'" stroke="'+AXIS+'" stroke-width="1.2"/>';
+  const lx = W - m.r - 250, ly = m.t + 2;
+  s += '<rect x="'+lx+'" y="'+ly+'" width="12" height="12" rx="2" fill="'+TEAL+'"/><text x="'+(lx+18)+'" y="'+(ly+11)+'" font-size="12" fill="'+LABEL+'">Positive</text>';
+  s += '<rect x="'+(lx+92)+'" y="'+ly+'" width="12" height="12" rx="2" fill="'+ROSE+'"/><text x="'+(lx+110)+'" y="'+(ly+11)+'" font-size="12" fill="'+LABEL+'">Negative</text>';
+  s += '<rect x="'+(lx+190)+'" y="'+ly+'" width="12" height="12" rx="2" fill="'+SLATE+'"/><text x="'+(lx+208)+'" y="'+(ly+11)+'" font-size="12" fill="'+LABEL+'">Total</text>';
+  s += '</svg>';
+  var host = document.getElementById('waterfall');
+  host.innerHTML = s;
+  new IntersectionObserver(function(es, obs){
+    es.forEach(function(e){ if (e.isIntersecting){ host.classList.add('go'); obs.disconnect(); } });
+  }, {threshold:.3}).observe(host);
+})();
+</script>
+</body>
+</html>
