@@ -205,6 +205,8 @@
   .hero-cta span{display:block;font-size:13px;color:var(--ink-soft);margin-top:2px}
   .hero-cta .arrow{font-size:23px;color:var(--teal-deep)}
   .lab-shell{width:min(1120px,calc(100vw - 40px));margin:52px 50% 64px;transform:translateX(-50%);padding:34px;border:1px solid var(--hair);border-radius:18px;background:#f7f8f6;box-shadow:0 24px 60px rgba(26,26,26,.07)}
+  .lab-shell.rv{transform:translateX(-50%) translateY(22px)}
+  .lab-shell.rv.in{transform:translateX(-50%)}
   .lab-head{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:start;margin-bottom:24px}
   .lab-kicker{font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:var(--teal-deep);margin-bottom:8px}
   .lab-head h2{font-size:28px;line-height:1.18;letter-spacing:-.02em;text-transform:none;margin:0 0 8px}
@@ -241,7 +243,7 @@
   .metric b{font-size:16px;color:#fff;font-weight:600}
   .metric em{display:block;font-size:10.5px;color:#73d7bb;font-style:normal;margin-top:3px}
   .disclaimer{font-size:11.5px;line-height:1.5;color:#6d746f;margin:15px 2px 0}
-  @media(max-width:800px){.lab-shell{padding:22px;width:100%;margin:52px 0 64px;transform:none}.engine-grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.lab-head{grid-template-columns:1fr}.stage-badge{justify-self:start}.hero-cta{align-items:flex-start}}
+  @media(max-width:800px){.lab-shell{padding:22px;width:100%;margin:52px 0 64px;transform:none}.lab-shell.rv{transform:translateY(22px)}.lab-shell.rv.in{transform:none}.engine-grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.lab-head{grid-template-columns:1fr}.stage-badge{justify-self:start}.hero-cta{align-items:flex-start}}
 
 </style>
 </head>
